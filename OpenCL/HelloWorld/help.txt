@@ -1,0 +1,113 @@
+Radeon Compute Profiler (rcprof) 64 bits - V5.4.6878
+Usage: rcprof <options> ApplicationToProfile [arguments for application]
+
+General options:
+  --startdisabled                   Start the application with profiling 
+                                    disabled. This is useful for applications 
+                                    that call amdtStopProfiling and 
+                                    amdtResumeProfiling from the 
+                                    AMDTActivityLogger library.
+  -d [ --startdelay ] arg (=0)      Profiling will be enabled after the 
+                                    specified delay (in milliseconds). This 
+                                    delay is relative to the first API call 
+                                    (either OpenCL or HSA) made by the 
+                                    application.
+  -D [ --profileduration ] arg (=0) Profile duration in milliseconds.
+  -e [ --envvar ] arg               Environment variable that should be defined
+                                    when running the profiled application. 
+                                    Argument should be in the format 
+                                    NAME=VALUE.
+  -E [ --envvarfile ] arg           Path to a file containing a list of 
+                                    environment variables that should be 
+                                    defined when running the profiled 
+                                    application. The file should contain one 
+                                    line for each variable in the format 
+                                    NAME=VALUE.
+  -f [ --fullenv ]                  The environment variables specified with 
+                                    the envvar or envvarfile switch represent 
+                                    the full environment block.  If not 
+                                    specified, then the environment variables 
+                                    represent additions or changes to the 
+                                    system environment block.
+  -l [ --list ]                     Print a list of valid counter names.
+  --listactive                      Print a list of valid counter names for 
+                                    active devices.
+  -L [ --listdetailed ]             Print a list of valid counter names with 
+                                    descriptions.
+  --listdetailedactive              Print a list of valid counter names with 
+                                    descriptions for active devices.
+  -N [ --sessionname ] arg          Name of the generated session.
+  --maxpassperfile arg              Limits the set of counters in the generated
+                                    counter file to a set that can be collected
+                                    in the the specified number of passes. If 
+                                    the full set of counters do not fit in the 
+                                    specified number of passes, then multiple 
+                                    counter files will be generated. Ignored if
+                                    --list and --outputfile are not specified.
+  --numberofpass                    Print the number of passes required for the
+                                    specified counter set (or the default set 
+                                    if no counter file is specified).
+  -o [ --outputfile ] arg           Path to OutputFile (the default is 
+                                    ~/Session1.csv when collecting performance 
+                                    counters; the default is ~/apitrace.atp 
+                                    when performing an API trace).
+  --hsanokerneldemangle             Disable the demangling of the kernel name 
+                                    in HSA trace or performance counter mode.
+  -v [ --version ]                  Print the rcprof version number.
+  -w [ --workingdirectory ] arg     Set the working directory (the default is 
+                                    the app binary's path).
+  -h [ --help ]                     Print this help message.
+  --showdoc                         Launch the documentation.
+
+
+Profile mode options:
+  -t [ --apitrace ]             Trace OpenCL application and generate CPU and 
+                                GPU time stamps and detailed API call traces.
+  -p [ --perfcounter ]          Get the performance counters for each OpenCL 
+                                kernel dispatched by the application.
+  -A [ --hsatrace ]             Trace HSA application and generate CPU and GPU 
+                                time stamps and detailed API call traces.
+  -C [ --hsapmc ]               Get the performance counters for each HSA 
+                                kernel dispatched by the application.
+  --hsaaqlpackettrace           Enable HSA AQL Packet tracing.  This enhances 
+                                the --hsatrace output by adding information 
+                                about all AQL packets processed by the 
+                                application.
+  -O [ --occupancy ]            Generate kernel occupancy information for each 
+                                OpenCL kernel dispatched by the application.
+  -P [ --occupancydisplay ] arg Path to configuration file to use to generate 
+                                an occupancy display file. This can be either a
+                                file with name=value pairs, or it can be a 
+                                .occupancy file (when used with 
+                                --occupancyindex). The occupancy display file 
+                                to generate should be specified with 
+                                --outputfile.
+  -T [ --tracesummary ]         Generate summary pages from an input .atp file.
+
+
+For more information use: --help <mode>
+  for example: rcprof --help --apitrace
+Examples
+
+	An example to collect OpenCL performance counters: 
+	rcprof - o "/path/to/output.csv" -p -w "/path/to/app/working/directory" "/path/to/app.exe" --device gpu
+
+	An example to collect an OpenCL API trace:
+	rcprof -o "/path/to/output.atp" -t -w "/path/to/app/working/directory" "/path/to/app.exe" --device gpu
+
+	An example to collect HSA performance counters (Linux only): 
+	rcprof -o "/path/to/output.csv" -C -w "/path/to/app/working/directory" "/path/to/app.exe"
+
+	An example to collect an HSA API trace(Linux only) :
+	rcprof -o "/path/to/output.atp" -A -w "/path/to/app/working/directory" "/path/to/app.exe"
+
+	An example to collect an OpenCL API trace with summary pages:
+	rcprof -o "/path/to/output.atp" -t -T -w "/path/to/app/working/directory" "/path/to/app.exe" --device gpu
+
+	An example to generate summary pages from an .atp file:
+	rcprof -a "/path/to/output.atp" -T
+
+	An example to generate an occupancy display page:
+	rcprof -P "/path/to/session.occupancy" --occupancyindex 2 -o "path/to/output.html"
+
+For complete documentation of Radeon Compute Profiler, please open docs/index.html in a web browser, or use the --showdoc switch to launch the documentation.
