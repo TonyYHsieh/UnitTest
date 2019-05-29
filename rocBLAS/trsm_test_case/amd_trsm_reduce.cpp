@@ -5,7 +5,7 @@
 #include <rocblas.h>
 #include <assert.h>
 
-#define PAGE_LOCK
+//#define PAGE_LOCK
 #define OUT_CSV
 //#define ACCURACY_CHECK
 
@@ -89,19 +89,25 @@ int main(int argc, char* argv[])
 {
     // column major
     int iter_num = atoi(argv[1]);
+
     // Linear dimension of matrices
     char side  = argv[2][0];
     char uplo  = argv[2][1];
     char trans = argv[2][2];
     char diag  = argv[2][3];
+
     size_t nb    = atoi(argv[3]);
     size_t start = atoi(argv[4]);
     size_t end   = atoi(argv[5]);
+
     size_t lda, ldb, ldc;
     size_t rows_a, rows_b;
     size_t cols_a, cols_b;
+
     lda = rows_a = cols_a = nb;
+
     int m = nb, current;
+
     if(side == 'L' || side == 'l'){
         ldb = nb;
         rows_b = nb;

@@ -90,16 +90,20 @@ int main(int argc, char* argv[])
 {
     // column major
     int iter_num = atoi(argv[1]);
+
     // Linear dimension of matrices
     char side  = argv[2][0];
     char uplo  = argv[2][1];
     char trans = argv[2][2];
     char diag  = argv[2][3];
+
     size_t m = atoi(argv[3]);
     size_t n = atoi(argv[4]);
+
     size_t lda, ldb, ldc;
     size_t rows_a, rows_b;
     size_t cols_a, cols_b;
+
     lda = rows_a = cols_a = m;
     if(side == 'L' || side == 'l'){
         ldb = m;
@@ -132,28 +136,27 @@ int main(int argc, char* argv[])
     hipMalloc((void**)&d_B, ldb * cols_b * sizeof(double));
 
     // Matrices are arranged column major
-    size_t i, j, index;
-    for(j=0; j<cols_a; j++) {
+    for(size_t j=0; j<cols_a; j++) {
         if(uplo == 'U' || uplo == 'u') 
-            for(i=0; i<=j; i++) {
-                index = j * lda + i;
+            for(size_t i=0; i<=j; i++) {
+                size_t index = j * lda + i;
                 if(diag == 'U' || diag == 'u')
                     A[index] = 1;
                 else
                     A[index] = sin(index);
             }
         else
-            for(i=j; i<rows_a; i++) {
-                index = j * lda + i;
+            for(size_t i=j; i<rows_a; i++) {
+                size_t index = j * lda + i;
                 if(diag == 'U' || diag == 'u')
                     A[index] = 1;
                 else
                     A[index] = sin(index);
             }
     }
-    for(j=0; j<cols_b; j++) {
-        for(i=0; i<rows_b; i++) {
-            index = j * ldb + i;
+    for(size_t j=0; j<cols_b; j++) {
+        for(size_t i=0; i<rows_b; i++) {
+            size_t index = j * ldb + i;
             B[index] = cos(index);
         }
     }
@@ -180,7 +183,8 @@ int main(int argc, char* argv[])
         rows = n;
         cols = m;
     }
-    for(index = 0; index<iter_num; index++){
+
+    for(int index = -2; index<iter_num; index++){
         // Set input matrices on device
         hipEventRecord(time0, NULL);
         hipSetMatrix(rows_a, cols_a, sizeof(double), A, lda, d_A, lda);
@@ -188,7 +192,10 @@ int main(int argc, char* argv[])
         hipEventRecord(time1, NULL);
 	hipEventSynchronize(time1);
         hipEventElapsedTime(&eventTimer, time0, time1);
-        time_stage1 += eventTimer / 1000.0;
+        if (index >= 0)
+        {
+            time_stage1 += eventTimer / 1000.0;
+        }
 
         rocblas_dtrsm(handle,
                 getSide_gpu(side),
@@ -203,14 +210,20 @@ int main(int argc, char* argv[])
         hipEventRecord(time2, NULL);
 	hipEventSynchronize(time2);
         hipEventElapsedTime(&eventTimer, time1, time2);
-        time_stage2 += eventTimer / 1000.0;
+        if (index >= 0)
+        {
+            time_stage2 += eventTimer / 1000.0;
+        }
     
         // Retrieve result matrix from device
         hipGetMatrix(rows_b, cols_b, sizeof(double), d_B, ldb, BB, ldb);
         hipEventRecord(time3, NULL);
 	hipEventSynchronize(time3);
         hipEventElapsedTime(&eventTimer, time2, time3);
-        time_stage3 += eventTimer / 1000.0;
+        if (index >= 0)
+        {
+            time_stage3 += eventTimer / 1000.0;
+        }
     }
 
     double trsm_perf = 1.0 * 1e-12 * m * m * n / (time_stage2 / iter_num);
@@ -241,9 +254,9 @@ int main(int argc, char* argv[])
             B, ldb);
 
     // Accuracy check
-    size_t B_index;
-    for(i=0; i<m; i++){
-        for(j=0; j<n; j++){
+    for(size_t i=0; i<m; i++){
+        for(size_t j=0; j<n; j++){
+            size_t B_index;
 	    if(side == 'L' || side == 'l')
                 B_index = j * ldb + i;
             else

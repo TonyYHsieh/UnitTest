@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
             hipEventRecord(time1, NULL);
             hipEventSynchronize(time1);
             hipEventElapsedTime(&eventTimer, time0, time1);
-            if (index > 0)
+            if (index >= 0)
                 time_stage1 += eventTimer / 1000.0;
 
             rocblas_dtrsv(handle,
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
             hipEventRecord(time2, NULL);
             hipEventSynchronize(time2);
             hipEventElapsedTime(&eventTimer, time1, time2);
-            if (index > 0)
+            if (index >= 0)
                 time_stage2 += eventTimer / 1000.0;
         
             // Retrieve result matrix from device
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
             hipEventRecord(time3, NULL);
             hipEventSynchronize(time3);
             hipEventElapsedTime(&eventTimer, time2, time3);
-            if (index > 0)
+            if (index >= 0)
                 time_stage3 += eventTimer / 1000.0;
         }
 

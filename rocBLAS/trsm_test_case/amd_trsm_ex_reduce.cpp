@@ -6,7 +6,7 @@
 #include <assert.h>
 
 
-#define PAGE_LOCK
+// #define PAGE_LOCK
 #define EX_STREAM
 #define OUT_CSV
 // #define ACCURACY_CHECK
