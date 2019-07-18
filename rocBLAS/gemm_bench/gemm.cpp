@@ -57,17 +57,17 @@ inline void free_device_memory(void* ptr)
 /*************************************************/
 template<typename T>
 void testing_gemm(size_t m, size_t n, size_t k,
-                  gpublasOperation_t trans_a, gpublasOperation_t trans_b,
+                  char trans_a, char trans_b,
                   size_t lda, size_t ldb, size_t ldc,
                   const char* alpha_str, const char* beta_str,
                   int iter_num, double tolerance)
 {
     /**** get dimension information *****/
-    size_t row_a = ((trans_a == GPUBLAS_OP_N) ? m : k);
-    size_t col_a = ((trans_a == GPUBLAS_OP_N) ? k : m);
+    size_t row_a = ((char_to_target_operation(trans_a) == GPUBLAS_OP_N) ? m : k);
+    size_t col_a = ((char_to_target_operation(trans_a) == GPUBLAS_OP_N) ? k : m);
 
-    size_t row_b = ((trans_a == GPUBLAS_OP_N) ? k : n);
-    size_t col_b = ((trans_a == GPUBLAS_OP_N) ? n : k);
+    size_t row_b = ((char_to_target_operation(trans_b) == GPUBLAS_OP_N) ? k : n);
+    size_t col_b = ((char_to_target_operation(trans_b) == GPUBLAS_OP_N) ? n : k);
 
     size_t row_c = m;
     size_t col_c = n;
@@ -108,8 +108,8 @@ void testing_gemm(size_t m, size_t n, size_t k,
     for(int i=0; i<2; i++)
     {
         gpublas_gemm<T>(handle,
-                        trans_a,
-                        trans_b,
+                        char_to_target_operation(trans_a),
+                        char_to_target_operation(trans_b),
                         m,
                         n,
                         k,
@@ -128,8 +128,8 @@ void testing_gemm(size_t m, size_t n, size_t k,
     for(int i=0; i<iter_num; i++)
     {
         gpublas_gemm<T>(handle,
-                        trans_a,
-                        trans_b,
+                        char_to_target_operation(trans_a),
+                        char_to_target_operation(trans_b),
                         m,
                         n,
                         k,
@@ -214,8 +214,8 @@ int main(int argc, char* argv[])
     size_t n = atoi(argv[3]);
     size_t k = atoi(argv[4]);
 
-    gpublasOperation_t trans_a = char_to_target_operation(argv[5][0]);
-    gpublasOperation_t trans_b = char_to_target_operation(argv[6][0]);
+    char trans_a = argv[5][0];
+    char trans_b = argv[6][0];
 
     size_t lda = atoi(argv[7]);
     size_t ldb = atoi(argv[8]);
