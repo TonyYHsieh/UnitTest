@@ -55,7 +55,7 @@ std::ostream& operator<<(std::ostream& out, const T& val)
 template <typename T, typename std::enable_if<!is_complex<T>>::type* = nullptr>
 inline size_t multiplication_times(size_t m, size_t n, size_t k)
 {
-    return m * n * k;
+    return m * n * k * 2;
 }
 
 template <typename T, typename std::enable_if<is_complex<T>>::type* = nullptr>
@@ -63,7 +63,7 @@ inline size_t multiplication_times(size_t m, size_t n, size_t k)
 {
     // a+bi and c+di has (ac - bd) + (ad + bc)i
     // 4 multiplications
-    return m * n * k * 4;
+    return m * n * k * 2 * 4;
 }
 
 /*************************************************/
