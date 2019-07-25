@@ -14,6 +14,9 @@
 #include "rocblas_wrapper.h"
 #endif
 
+#define PERFORMANCE_MEASURE
+#define VERIFY_CORRECTNESS
+
 /*************************************************/
 /**              random function                **/
 /*************************************************/
@@ -85,6 +88,7 @@ void testing_gemm(size_t m, size_t n, size_t k,
     // initial with random data
     fill_matrix(host_a, row_a, col_a, lda);
     fill_matrix(host_b, row_b, col_b, ldb);
+    fill_matrix(host_c, row_c, col_c, ldc);
 
     /***** init device memory *****/
     T* dev_tmp = nullptr;
@@ -100,10 +104,12 @@ void testing_gemm(size_t m, size_t n, size_t k,
     double gpu_time = get_time_us();
     SetMatrix(row_a, col_a, sizeof(T), host_a.data(), lda, dev_a.get(), lda);
     SetMatrix(row_b, col_b, sizeof(T), host_b.data(), ldb, dev_b.get(), ldb);
+    SetMatrix(row_c, col_c, sizeof(T), host_c.data(), ldc, dev_c.get(), ldc);
     double mem_write_time = (get_time_us() - gpu_time) * 1e-6;
 
     gpublas_handle handle;
 
+#ifdef PERFORMANCE_MEASURE
     // warm up GPU
     for(int i=0; i<2; i++)
     {
@@ -146,14 +152,32 @@ void testing_gemm(size_t m, size_t n, size_t k,
 
     // read result back to host
     gpu_time = get_time_us();
-    GetMatrix(row_c, col_c, sizeof(T), dev_c.get(), ldc, host_dev_c.data(), ldc);
     double mem_read_time = (get_time_us() - gpu_time) * 1e-6;
-
     double gemm_perf = multiplication_times<T>(m, n, k) * 1e-12 / (exe_time / iter_num);
-
     std::cout << m << " " << n << " " << k << " " << lda << " " << ldb << " " << ldc << " " << gemm_perf << std::endl;
+#endif
 
-    /***** cblas *****/
+#ifdef VERIFY_CORRECTNESS
+    /***** check correctness *****/
+    SetMatrix(row_c, col_c, sizeof(T), host_c.data(), ldc, dev_c.get(), ldc);
+
+    gpublas_gemm<T>(handle,
+                    char_to_target_operation(trans_a),
+                    char_to_target_operation(trans_b),
+                    m,
+                    n,
+                    k,
+                    &alpha,
+                    dev_a.get(),
+                    lda,
+                    dev_b.get(),
+                    ldb,
+                    &beta,
+                    dev_c.get(),
+                    ldc);
+
+    GetMatrix(row_c, col_c, sizeof(T), dev_c.get(), ldc, host_dev_c.data(), ldc);
+
     cblas_gemm<T>(CblasColMajor,
                   char_to_cblas_operation(trans_a),
                   char_to_cblas_operation(trans_b),
@@ -182,6 +206,7 @@ void testing_gemm(size_t m, size_t n, size_t k,
             }
         }
     }
+#endif
 
 #ifdef DEBUG // for debug
     std::cout << std::endl << std::endl << "----- a -----" << std::endl;
@@ -224,7 +249,7 @@ int main(int argc, char* argv[])
     const char* alpha = argv[10];
     const char* beta  = argv[11];
 
-    int iter_num   = atoi(argv[12]);
+    int iter_num = atoi(argv[12]);
     // Linear dimension of matrices
 
     constexpr double EPSILON = 0.0001;
