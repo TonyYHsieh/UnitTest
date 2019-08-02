@@ -33,9 +33,9 @@ inline T random_generator()
 template <typename T, typename std::enable_if<is_complex<T>>::type* = nullptr>
 inline T random_generator()
 {
-    decltype(T::x) real = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
-    decltype(T::y) imag = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
-    return T{real, imag};
+    auto real = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
+    auto imag = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
+    return T(real, imag);
 }
 
 template <typename T>
