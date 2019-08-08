@@ -32,4 +32,27 @@
 #define gpublasCgemm cublasCgemm
 #define gpublasZgemm cublasZgemm
 
+
+template <typename T>
+constexpr bool is_complex = false;
+template <>
+constexpr bool is_complex<gpuFloatComplex> = true;
+template <>
+constexpr bool is_complex<gpuDoubleComplex> = true;
+
+namespace std
+{
+    template <typename T, typename enable_if<is_complex<T>>::type* = nullptr>
+    inline auto real(const T& z) -> decltype(z.x)
+    {
+        return z.x;
+    }
+
+    template <typename T, typename enable_if<is_complex<T>>::type* = nullptr>
+    inline auto imag(const T& z) -> decltype(z.y)
+    {
+        return z.y;
+    }
+}
+
 #endif // _CUBLAS_WRAPPER_H_

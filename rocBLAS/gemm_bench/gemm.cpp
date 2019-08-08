@@ -16,6 +16,7 @@
 
 #define PERFORMANCE_MEASURE
 #define VERIFY_CORRECTNESS
+// #define DEBUG
 
 /*************************************************/
 /**              random function                **/
@@ -33,9 +34,9 @@ inline T random_generator()
 template <typename T, typename std::enable_if<is_complex<T>>::type* = nullptr>
 inline T random_generator()
 {
-    auto real = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
-    auto imag = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
-    return T(real, imag);
+    decltype(std::real(T{})) real = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
+    decltype(std::real(T{})) imag = std::uniform_int_distribution<int>(1, 10)(rocblas_rng);
+    return T{real, imag};
 }
 
 template <typename T>

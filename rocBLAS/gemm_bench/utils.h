@@ -35,7 +35,7 @@ std::ostream& operator<<(std::ostream& out, const T& val)
     if (val.y >= 0)
         out << std::real(val) << "+" << std::imag(val) << "i";
     else
-        out << std::real(val.x) << std::imag(val) << "i";
+        out << std::real(val) << std::imag(val) << "i";
     return out;
 }
 
@@ -136,18 +136,18 @@ template <typename T, typename std::enable_if<is_complex<T>>::type* = nullptr>
 inline T string_to_datavalue(const std::string& value)
 {
     std::string::size_type sz;
-    double real = 0;
-    double imag = 0;
+    decltype(std::real(T{})) re = 0.0;
+    decltype(std::real(T{})) im = 0.0;
 
     if(value == "")
-        return T(real, imag);
+        return T{re, im};
 
-    double tmp = std::stod(value, &sz);
+    decltype(std::real(T{})) tmp = std::stod(value, &sz);
 
     if(value[sz] != 'i')
     {
         // real part
-        real = tmp;
+        re = tmp;
 
         // imagnary part
         if(sz != value.size())
@@ -156,7 +156,7 @@ inline T string_to_datavalue(const std::string& value)
                 throw std::invalid_argument("Invalid Complex Value");
 
             std::string::size_type sz2;
-            imag = std::stod(value.substr(sz), &sz2);
+            im = std::stod(value.substr(sz), &sz2);
             sz += sz2;
 
             if(value[sz] != 'i')
@@ -167,14 +167,14 @@ inline T string_to_datavalue(const std::string& value)
     else
     {
         // only imagnary case
-        imag = tmp;
+        im = tmp;
         sz++;
     }
 
     if(sz != value.size())
         throw std::invalid_argument("Invalid Complex Value");
 
-    return T(real, imag);
+    return T{re, im};
 }
 
 /*************************************************/
