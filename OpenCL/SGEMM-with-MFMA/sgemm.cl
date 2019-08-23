@@ -113,7 +113,7 @@ kernel void sgemm(__global const float* buffer_a,
         accumalte = __llvm_amdgcn_mfma_f32_32x32x2f32(buffer_a[global_read_a_offset], buffer_b[global_read_b_offset], accumalte, _mfma_workspace_, PROCESS_K_PER_INSTRUCTION);
     }
 
-#if 1
+    // handle remainder
     if (K & 0x1)
     {
         size_t k = K/PROCESS_K_PER_INSTRUCTION;
@@ -130,7 +130,6 @@ kernel void sgemm(__global const float* buffer_a,
 
         accumalte = __llvm_amdgcn_mfma_f32_32x32x2f32(a, b, accumalte, _mfma_workspace_, PROCESS_K_PER_INSTRUCTION);
     }
-#endif
 
 #if 1
     int out_x = group_x * MACRO_TILE_SIZE + (local_id / 32 * MFMA_OUTPUT_WIDTH_PER_THREAD);

@@ -1,4 +1,4 @@
-all: sgemm.o clEnv.o
+all: sgemm.o
 	g++ -o sgemm sgemm.o -L/opt/rocm/opencl/lib/x86_64/ -lOpenCL -lblas
 
 sgemm.o: sgemm.cpp
