@@ -7,10 +7,11 @@
 #include <CL/cl.h>
 
 // constant
-#define NUM_GROUPS 17
+#define NUM_GROUPS 10
 #define GROUP_SIZE 64
 
-#define SOURCE "kernel.s"
+#define USE_CL_SOURCE 0
+#define SOURCE "kernel-gfx906-lds128.s"
 
 void checkCLError(cl_int err, const char* ptr)
 {
@@ -23,7 +24,7 @@ void checkCLError(cl_int err, const char* ptr)
 
 cl_program compileAssambly(std::string src, std::string param, std::string dst)
 {
-    std::string command = "/opt/rocm/opencl/bin/x86_64/clang  -x assembler -target amdgcn--amdhsa -mcpu=gfx803";
+    std::string command = "/opt/rocm/opencl/bin/x86_64/clang -x assembler -target amdgcn--amdhsa -mno-code-object-v3 -mcpu=gfx906";
     command = command + " -o " + dst;
     command = command + " " + src;
     system(command.c_str());
@@ -129,10 +130,11 @@ int main()
     std::cout << "gpu device: " << devName << std::endl;
 
     // create command queue with profiler
-    cl_command_queue commandQueue = clCreateCommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE, &err);
+    cl_queue_properties props[]   = {CL_QUEUE_PROPERTIES, CL_QUEUE_PROFILING_ENABLE, 0};
+    cl_command_queue commandQueue = clCreateCommandQueueWithProperties(context, device, props, &err);
     checkCLError(err, "clCreateCommandQueue");
 
-#if 0
+#if USE_CL_SOURCE
     // create progream from source
     std::ifstream clfile("kernel.cl");
     std::string source((std::istreambuf_iterator<char>(clfile)), std::istreambuf_iterator<char>());
@@ -145,7 +147,7 @@ int main()
 #endif
 
     // build progream
-    err = clBuildProgram(program, 1, &device, "", NULL, NULL);
+    err = clBuildProgram(program, 1, &device, "-cl-std=CL2.0", NULL, NULL);
     if (err != CL_SUCCESS)
     {
         char buffer[10240];
